@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dungeon Loot Splitter app to collect loot and split value among party members.">
+  <meta name="author" content="Eiki Furuya">
+  <meta name="keywords" content="dungeon loot splitter, loot tracker, party split, RPG tools">
+  <meta name="robots" content="index, follow">
+  <title>Dungeon Loot Splitter</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top-row">
+    <h1>Dungeon Loot Splitter</h1>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="party-setup-heading">
+      <h2 id="party-setup-heading">Party Setup</h2>
+      <div class="field-group">
+        <label for="partySize">Number of Party Members:</label>
+        <input id="partySize" type="number" min="1" step="1" required>
+      </div>
+      <p id="partyMessage" class="message" aria-live="polite"></p>
+      <button id="resetAllBtn" class="secondary-button" type="button">Reset All</button>
+    </section>
+
+    <section class="panel" aria-labelledby="add-loot-heading">
+      <h2 id="add-loot-heading">Add Loot</h2>
+      <div class="field-stack">
+        <div class="field-group">
+          <label for="lootName">Loot Name:</label>
+          <input id="lootName" type="text" required>
+        </div>
+
+        <div class="field-group">
+          <label for="lootValue">Loot Value:</label>
+          <input id="lootValue" type="number" min="0" step="0.01" required>
+        </div>
+
+        <div class="field-group">
+          <label for="lootQuantity">Quantity:</label>
+          <input id="lootQuantity" type="number" min="1" step="1" required>
+        </div>
+      </div>
+
+      <button id="addLootBtn" type="button">Add Loot</button>
+      <p id="addLootMessage" class="message" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="loot-list-heading">
+      <h2 id="loot-list-heading">Loot List</h2>
+
+      <div id="noLootMessage" class="message">No loot added.</div>
+
+      <div class="loot-table" aria-live="polite">
+        <div class="loot-header">Name</div>
+        <div class="loot-header">Value</div>
+        <div class="loot-header">Quantity</div>
+        <div class="loot-header">Remove</div>
+
+        <div id="lootRows"></div>
+      </div>
+
+      <div id="lootTotalsRow" class="total-row">
+        Total Loot: $<span id="totalLoot">0.00</span>
+      </div>
+    </section>
+
+    <section class="panel split-panel" aria-labelledby="split-loot-heading">
+      <h2 id="split-loot-heading">Split Loot</h2>
+      <button id="splitLootBtn" type="button">Split Loot</button>
+      <p id="splitMessage" class="message" aria-live="polite"></p>
+      <div id="splitResults" class="results hidden" aria-live="polite">
+        <p class="result-line"><strong>Total Loot</strong>: $<span id="finalTotal">0.00</span></p>
+        <p class="result-line"><strong>Loot Per Party Member</strong>: $<span id="perMember">0.00</span></p>
+      </div>
+    </section>
+
+    <section class="panel reflection" aria-labelledby="logic-explanation-heading">
+      <h2 id="logic-explanation-heading">Logic Explanation</h2>
+      <p>
+        The loot array and party size are the single source of truth, so the screen always reflects what the state
+        currently contains. I added a quantity property to each loot object so the total value uses value × quantity
+        rather than just value alone. All calculations and rendering happen inside updateUI(), which keeps the
+        system consistent and prevents duplicate logic. State changes are saved to localStorage as one object, and
+        the app restores that object on load before running updateUI() so the interface matches the saved state.
+        JSON.stringify() turns the state object into text for storage, and JSON.parse() turns it back into data on
+        restore. While debugging, I set a breakpoint in restoreState(), inspected the restored loot array and party
+        size, and confirmed that updateUI() runs only after valid state is reconstructed. The interface is controlled
+        by state: when data is invalid or missing, results are hidden and the Split button is disabled; when state
+        becomes valid, those UI elements appear and become enabled. Conditional logic prevents invalid state from
+        affecting the display and keeps totals from showing when data is incomplete.
+      </p>
+      <figure class="logic-figure">
+        <img src="images/logic-flow-sketch.jpg" alt="Logic flow sketch showing user action, state restore or mutation, storage update, updateUI, and interface update">
+        <figcaption>Logic flow sketch: user action → state change or restore → save or clear storage → updateUI() → interface update.</figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
